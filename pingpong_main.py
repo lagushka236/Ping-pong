@@ -1,5 +1,6 @@
 from pygame import *
 mixer.init()
+font.init()
 
 win_width = 700
 win_height = 500
@@ -9,6 +10,12 @@ bg = transform.scale(image.load('background.png'), (win_width, win_height))
 mixer.music.load('bg_music.mp3')
 mixer.music.set_volume(0.4)
 mixer.music.play()
+wall = mixer.Sound('wall.mp3')
+platform = mixer.Sound('platform.mp3')
+win = mixer.Sound('win_yaaaay.mp3')
+
+score_1 = 0
+score_2 = 0
 
 class GameSprite(sprite.Sprite):
     def __init__(self, img: str, x: int, y: int, w: int, h: int, speed: int):
@@ -45,15 +52,35 @@ class Ball(GameSprite):
         self.speed_y = speed
 
     def rand_movement(self):
+        global score_1, score_2        
         self.rect.x += self.speed_x
         self.rect.y += self.speed_y
-        if s
+        if self.rect.y <= 0 or self.rect.y >= win_height - self.h:
+            self.speed_y *= -1
+            wall.play()
+        if sprite.collide_rect(self, player1) or sprite.collide_rect(self, player2):
+            self.speed_x *= -1
+            platform.play()
+        if self.rect.x <= 0:
+            self.rect.x = win_width // 2
+            self.rect.y = win_height // 2
+            score_1 += 1
+            self.speed_x *= -1
+            win.play()
+        if self.rect.x >= win_width - self.w:
+            self.rect.x = win_width // 2
+            self.rect.y = win_height // 2 
+            score_2 += 1
+            self.speed_x *= -1
+            win.play()
+            
 
 
 player1 = Player('platform_left.png', win_width * 0.01, win_height // 2, win_width // 35, win_height // 5, win_height // 100)
 player2 = Player('platform_right.png', win_width - win_width * 0.04, win_height // 2, win_width // 35, win_height // 5, win_height // 100)
 ball = Ball('tennis_ball.png', win_width // 2, win_height // 2, win_width // 14, win_height // 10, win_height // 100)
 
+font1 = font.Font(None, win_width // 15)
 
 clock = time.Clock()
 game = True
@@ -64,7 +91,7 @@ while game:
             game = False
 
     window.blit(bg, (0, 0))
-    if not finish:
+    if not finish: 
         player1.update_left()
         player2.update_right()
         ball.rand_movement()
