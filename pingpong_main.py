@@ -6,13 +6,16 @@ win_width = 700
 win_height = 500
 window = display.set_mode((win_width, win_height))
 display.set_caption('Ping Pong')
-bg = transform.scale(image.load('background.png'), (win_width, win_height))
+bg = transform.scale(image.load('background.jpg'), (win_width, win_height))
+
 mixer.music.load('bg_music.mp3')
 mixer.music.set_volume(0.4)
 mixer.music.play()
 wall = mixer.Sound('wall.mp3')
 platform = mixer.Sound('platform.mp3')
 win = mixer.Sound('win_yaaaay.mp3')
+win.set_volume(0.15)
+true_win = mixer.Sound('absolute_win.mp3')
 
 score_1 = 0
 score_2 = 0
@@ -50,6 +53,7 @@ class Ball(GameSprite):
         super().__init__(img, x, y, w, h, speed)
         self.speed_x = speed
         self.speed_y = speed
+        self.weit = 0
 
     def rand_movement(self):
         global score_1, score_2        
@@ -59,18 +63,22 @@ class Ball(GameSprite):
             self.speed_y *= -1
             wall.play()
         if sprite.collide_rect(self, player1) or sprite.collide_rect(self, player2):
-            self.speed_x *= -1
-            platform.play()
+            if self.weit == 0:    
+                self.speed_x *= -1
+                platform.play()
+                self.weit = 20
+        if self.weit > 0:
+            self.weit -= 1
         if self.rect.x <= 0:
             self.rect.x = win_width // 2
             self.rect.y = win_height // 2
-            score_1 += 1
+            score_2 += 1
             self.speed_x *= -1
             win.play()
         if self.rect.x >= win_width - self.w:
             self.rect.x = win_width // 2
             self.rect.y = win_height // 2 
-            score_2 += 1
+            score_1 += 1
             self.speed_x *= -1
             win.play()
             
@@ -81,6 +89,7 @@ player2 = Player('platform_right.png', win_width - win_width * 0.04, win_height 
 ball = Ball('tennis_ball.png', win_width // 2, win_height // 2, win_width // 14, win_height // 10, win_height // 100)
 
 font1 = font.Font(None, win_width // 15)
+font2 = font.Font(None, win_width // 10)
 
 clock = time.Clock()
 game = True
@@ -91,13 +100,20 @@ while game:
             game = False
 
     window.blit(bg, (0, 0))
-    if not finish: 
+    if not finish:
+        point1 = font1.render('Очки: ' + str(score_1), True, (255, 0, 0))
+        window.blit(point1, (win_width // 70, win_height // 50)) 
+
+        point2 = font1.render('Очки: ' + str(score_2), True, (0, 0, 255))
+        window.blit(point2, (win_width - win_width // 6, win_height // 50))
+
         player1.update_left()
         player2.update_right()
         ball.rand_movement()
         player1.reset()
         player2.reset()
         ball.reset()
+
     display.update()
     clock.tick(60)
 
