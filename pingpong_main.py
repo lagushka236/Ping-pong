@@ -89,7 +89,7 @@ player2 = Player('platform_right.png', win_width - win_width * 0.04, win_height 
 ball = Ball('tennis_ball.png', win_width // 2, win_height // 2, win_width // 14, win_height // 10, win_height // 100)
 
 font1 = font.Font(None, win_width // 15)
-font2 = font.Font(None, win_width // 10)
+font2 = font.Font(None, win_width // 12)
 
 clock = time.Clock()
 game = True
@@ -113,6 +113,18 @@ while game:
         player1.reset()
         player2.reset()
         ball.reset()
+
+        if score_1 >= 5:
+            win = font2.render('ПОБЕДИЛ ИГРОК СЛЕВА', True, (255, 0, 0))
+            true_win.play()
+            finish = True
+        if score_2 >= 5:
+            win = font2.render('ПОБЕДИЛ ИГРОК СПРАВА', True, (0, 0, 255))
+            true_win.play()
+            finish = True
+    else:
+        window.blit(win, (win_width // 10, win_height // 1.7))
+         
 
     display.update()
     clock.tick(60)
